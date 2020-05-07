@@ -800,7 +800,7 @@ static int udataval (lua_State *L) {
   return 1;
 }
 
-
+#ifdef RAVI_SUPPORT_COROUTINES
 static int doonnewstack (lua_State *L) {
   lua_State *L1 = lua_newthread(L);
   size_t l;
@@ -811,7 +811,7 @@ static int doonnewstack (lua_State *L) {
   lua_pushinteger(L, status);
   return 1;
 }
-
+#endif
 
 static int s2d (lua_State *L) {
   lua_pushnumber(L, *cast(const double *, luaL_checkstring(L, 1)));
@@ -856,7 +856,9 @@ static lua_State *getstate (lua_State *L) {
 static int loadlib (lua_State *L) {
   static const luaL_Reg libs[] = {
     {"_G", luaopen_base},
+#ifdef RAVI_SUPPORT_COROUTINES
     {"coroutine", luaopen_coroutine},
+#endif
     {"debug", luaopen_debug},
     {"io", luaopen_io},
     {"os", luaopen_os},
@@ -1208,9 +1210,11 @@ static int runC (lua_State *L, lua_State *L1, const char *pc) {
     else if EQ("newtable") {
       lua_newtable(L1);
     }
+#ifdef RAVI_SUPPORT_COROUTINES
     else if EQ("newthread") {
       lua_newthread(L1);
     }
+#endif
     else if EQ("newuserdata") {
       lua_newuserdata(L1, getnum);
     }
@@ -1287,10 +1291,12 @@ static int runC (lua_State *L, lua_State *L1, const char *pc) {
     else if EQ("replace") {
       lua_replace(L1, getindex);
     }
+#ifdef RAVI_SUPPORT_COROUTINES
     else if EQ("resume") {
       int i = getindex;
       status = lua_resume(lua_tothread(L1, i), L, getnum);
     }
+#endif
     else if EQ("return") {
       int n = getnum;
       if (L1 != L) {
@@ -1373,6 +1379,7 @@ static struct X { int x; } x;
       if (n == 0) n = lua_gettop(fs);
       lua_xmove(fs, ts, n);
     }
+#ifdef RAVI_SUPPORT_COROUTINES
     else if EQ("yield") {
       return lua_yield(L1, getnum);
     }
@@ -1381,6 +1388,7 @@ static struct X { int x; } x;
       int i = getindex;
       return lua_yieldk(L1, nres, i, Cfunck);
     }
+#endif
     else luaL_error(L, "unknown instruction %s", buff);
   }
   return 0;
@@ -1492,7 +1500,7 @@ static int sethook (lua_State *L) {
   return 0;
 }
 
-
+#ifdef RAVI_SUPPORT_COROUTINES
 static int coresume (lua_State *L) {
   int status;
   lua_State *co = lua_tothread(L, 1);
@@ -1508,6 +1516,7 @@ static int coresume (lua_State *L) {
     return 1;
   }
 }
+#endif
 
 /* }====================================================== */
 
@@ -1517,7 +1526,9 @@ static const struct luaL_Reg tests_funcs[] = {
   {"checkmemory", lua_checkmemory},
   {"closestate", closestate},
   {"d2s", d2s},
+#ifdef RAVI_SUPPORT_COROUTINES
   {"doonnewstack", doonnewstack},
+#endif
   {"doremote", doremote},
   {"gccolor", gc_color},
   {"gcstate", gc_state},
@@ -1538,7 +1549,9 @@ static const struct luaL_Reg tests_funcs[] = {
   {"querystr", string_query},
   {"querytab", table_query},
   {"ref", tref},
+#ifdef RAVI_SUPPORT_COROUTINES
   {"resume", coresume},
+#endif
   {"s2d", s2d},
   {"sethook", sethook},
   {"stacklevel", stacklevel},

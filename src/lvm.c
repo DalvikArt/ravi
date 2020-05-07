@@ -931,7 +931,7 @@ static void pushclosure (lua_State *L, Proto *p, UpVal **encup, StkId base,
     p->cache = ncl;  /* save it on cache for reuse */
 }
 
-
+#ifdef RAVI_SUPPORT_COROUTINES
 /*
 ** finish execution of an opcode interrupted by an yield
 */
@@ -995,7 +995,7 @@ void luaV_finishOp (lua_State *L) {
     default: lua_assert(0);
   }
 }
-
+#endif
 
 
 
